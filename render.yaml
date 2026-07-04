@@ -1,0 +1,14 @@
+services:
+  - type: worker
+    name: personal-telegram-assistant
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: XAI_API_KEY
+        sync: false
+      - key: ALLOWED_USER_ID
+        sync: false
