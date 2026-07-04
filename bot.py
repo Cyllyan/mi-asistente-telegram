@@ -392,7 +392,7 @@ def main():
     if not TELEGRAM_TOKEN or not XAI_API_KEY:
         log.error(
             "Faltan variables de entorno: TELEGRAM_TOKEN y/o XAI_API_KEY. "
-            "Defínelas antes de iniciar."
+            "Definalas antes de iniciar."
         )
         raise SystemExit(1)
 
@@ -403,27 +403,35 @@ def main():
         .build()
     )
 
-    app.add_handler(CommandHandler("start",    start_cmd))
-    app.add_handler(CommandHandler("help",     help_cmd))
-    app.add_handler(CommandHandler("ask",      chat_handler))  # /ask o chat libre
-    app.add_handler(CommandHandler("nota",     nota_cmd))
-    app.add_handler(CommandHandler("notas",    notas_cmd))
-    app.add_handler(CommandHandler("delnote",  delnote_cmd))
-    app.add_handler(CommandHandler("todo",     todo_cmd))
-    app.add_handler(CommandHandler("todos",    todos_cmd))
-    app.add_handler(CommandHandler("done",     done_cmd))
-    app.add_handler(CommandHandler("drop",     drop_cmd))
-    app.add_handler(CommandHandler("remind",   remind_cmd))
-    app.add_handler(CommandHandler("remindat", remindat_cmd))
-    app.add_handler(CommandHandler("clima",    clima_cmd))
-    app.add_handler(CommandHandler("resume",   resume_cmd))
+    app.add_handler(CommandHandler("start",   start_cmd))
+    app.add_handler(CommandHandler("help",    help_cmd))
+    app.add_handler(CommandHandler("ask",     chat_handler))
+    app.add_handler(CommandHandler("nota",    nota_cmd))
+    app.add_handler(CommandHandler("notas",   notas_cmd))
+    app.add_handler(CommandHandler("delnote", delnote_cmd))
+    app.add_handler(CommandHandler("todo",    todo_cmd))
+    app.add_handler(CommandHandler("todos",   todos_cmd))
+    app.add_handler(CommandHandler("done",    done_cmd))
+    app.add_handler(CommandHandler("drop",    drop_cmd))
+    app.add_handler(CommandHandler("remind",  remind_cmd))
+    app.add_handler(CommandHandler("remindat",remindat_cmd))
+    app.add_handler(CommandHandler("clima",   clima_cmd))
+    app.add_handler(CommandHandler("resume",  resume_cmd))
 
-    # chat libre (todo lo que NO sea comando)
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat_handler))
 
-    log.info("Iniciando polling…")
-    a    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    log.info("Iniciando polling")
+    # Workaround Python 3.14: PTB v21.6 llama a asyncio.get_event_loop() en el hilo
+    # principal, que en 3.14 ya no crea loop automaticamente -> RuntimeError.
+    # Forzamos la creacion explicita justo antes de run_polling().
+    try:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+    except RuntimeError:
+        pass
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
+
 
 if __name__ == "__main__":
     main()
+
 
